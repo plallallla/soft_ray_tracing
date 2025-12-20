@@ -9,6 +9,8 @@
 #include <string>
 #include <algorithm> // for std::swap
 
+#include <glm/glm.hpp>
+
 #pragma pack(push, 1)
 struct TGAHeader {
     std::uint8_t  idlength = 0;
@@ -46,6 +48,7 @@ struct TGAImage {
     void  flip_vertically();
     TGAColor get(const int x, const int y) const;
     void  set(const int x, const int y, const TGAColor& c);
+    void  set(const int x, const int y, const glm::vec3& c);
     int   width()  const;
     int   height() const;
 
@@ -264,6 +267,18 @@ inline TGAColor TGAImage::get(const int x, const int y) const {
 inline void TGAImage::set(int x, int y, const TGAColor& c) {
     if (!data.size() || x < 0 || y < 0 || x >= w || y >= h) return;
     std::memcpy(data.data() + (x + y * w) * bpp, c.bgra, bpp);
+}
+
+// 传入 ndc=[0, 1]的rgb, 转为[0, 255]的颜色
+inline void TGAImage::set(int x, int y, const glm::vec3& c) {
+    TGAColor color
+    {
+        static_cast<std::uint8_t>(c.b * 255),
+        static_cast<std::uint8_t>(c.g * 255),
+        static_cast<std::uint8_t>(c.r * 255),
+        255
+    };
+    set(x, y, color);
 }
 
 inline void TGAImage::flip_horizontally() {

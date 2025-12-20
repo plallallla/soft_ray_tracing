@@ -1,11 +1,15 @@
 #pragma once
 #include "HitTable.hpp"
+#include "Utility.hpp"
 #include "tgaimage.hpp"
 #include "Interval.hpp"
 #include <glm/geometric.hpp>
 #include <glm/trigonometric.hpp>
 
 #include "Sphere.hpp"
+
+constexpr glm::vec3 white = glm::vec3{1.f, 1.f, 1.f};
+constexpr glm::vec3 blue = glm::vec3{.5f, .7f, 1.f};
 
 class Camera
 {
@@ -31,34 +35,35 @@ class Camera
     glm::vec3 _defocus_disk_u;       // Defocus disk horizontal radius
     glm::vec3 _defocus_disk_v;       // Defocus disk vertical radius
 
-    TGAColor interpolate_color(float value, const TGAColor& c1, const TGAColor& c2)
+    glm::vec3 interpolate_color(float value, const glm::vec3& c1, const glm::vec3& c2)
     {
         float _v = 1.f - value;
-        return TGAColor
+        return glm::vec3
         {
-            static_cast<std::uint8_t>(c1.bgra[0] * value + c2.bgra[0] * _v),
-            static_cast<std::uint8_t>(c1.bgra[1] * value + c2.bgra[1] * _v),
-            static_cast<std::uint8_t>(c1.bgra[2] * value + c2.bgra[2] * _v),
-            255
+            c1.r * value + c2.r * _v,
+            c1.g * value + c2.g * _v,
+            c1.b * value + c2.b * _v,
         };
     }
 
-    TGAColor ray_color(const Ray& light, const HitTable& world)
+    Ray get_ray(float x, float y)
+    {
+        glm::vec3 width_vector = (x + RANDOM.get_float(-0.5f, 0.5f)) * _pixel_delta_u;
+        glm::vec3 height_vector = (y + RANDOM.get_float(-0.5f, 0.5f)) * _pixel_delta_v;
+        glm::vec3 pixel_center = width_vector + height_vector + _pixel00_loc;
+        return {_center, pixel_center - _center};
+    }
+
+    glm::vec3 ray_color(const Ray& light, const HitTable& world)
     {
         HitRecord record;
         if (world.hit(light, Interval{0, Interval::f_max}, record))
         {
             glm::vec3 normal = glm::normalize(record._normal);
-            return TGAColor
-            {
-                static_cast<std::uint8_t>(122.5f * (normal.b + 1.f)),
-                static_cast<std::uint8_t>(122.5f * (normal.g + 1.f)), 
-                static_cast<std::uint8_t>(122.5f * (normal.r + 1.f)), 
-                255
-            };
+            return 0.5f * (normal + glm::vec3{1.f, 1.f, 1.f});
         }
         glm::vec3 dir = glm::normalize(light.direction());
-        return interpolate_color((1. + dir.y) * .5f, TGAColor{255,255,255,255}, TGAColor{255,179,128,255});
+        return interpolate_color((1. + dir.y) * .5f, white, blue);
     }
 public:
     void init()
@@ -106,10 +111,12 @@ public:
             for (int w = 0; w < _image_width; w++)
             {
                 int x = w;
-                glm::vec3 width_vector = static_cast<float>(x) * _pixel_delta_u;
-                glm::vec3 pixel_center = width_vector + height_vector + _pixel00_loc;
-                Ray light{_center, pixel_center - _center};
-                img.set(x, y, ray_color(light, world));
+                glm::vec3 color{0.f, 0.f, 0.f};
+                for (int ct = 0; ct < _samples_per_pixel; ct++)
+                {
+                    color += ray_color(get_ray(static_cast<float>(x), static_cast<float>(y)), world);
+                }
+                img.set(x, y, color * (1.f / _samples_per_pixel));
             }
         }
     }
