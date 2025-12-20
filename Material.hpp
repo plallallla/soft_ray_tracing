@@ -7,7 +7,7 @@
 
 struct ScatterResult
 {
-    operator bool() { return _has_scatter; }
+    explicit operator bool() { return _has_scatter; }
     bool _has_scatter = false;
     glm::vec3 _attenuation;
     Ray _scattered_ray;

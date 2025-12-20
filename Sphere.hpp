@@ -26,8 +26,7 @@ public:
         if (!interval.surrounds(root)) return false;
         record._t = root;
         record._point = r.at(record._t);
-        // record.set_face_normal(r, record._point - _center);
-        record._normal = record._point - _center;
+        record.set_face_normal(r, record._point - _center);
         record._material = _material;
         return true;
     }

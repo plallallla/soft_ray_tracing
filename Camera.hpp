@@ -18,7 +18,7 @@ class Camera
     int _image_width{500};
     int _image_height{500};
     int _samples_per_pixel{10};
-    int _max_depth{1};
+    int _max_depth{10};
     float _fov{90.f};
     glm::vec3 _lookfrom{0.,0.,0.};
     glm::vec3 _lookat{0.,0.,-1.};
@@ -66,8 +66,6 @@ class Camera
             {
                 return result._attenuation * ray_color(result._scattered_ray, world, depth - 1);
             }
-            glm::vec3 normal = glm::normalize(record._normal);
-            return 0.5f * (normal + glm::vec3{1.f, 1.f, 1.f});
         }
         return sky_color(glm::normalize(light.direction()));
     }
@@ -77,7 +75,7 @@ class Camera
         return interpolate_color((1. + direction.y) * .5f, white, blue);
     }
 public:
-    void init()
+    Camera()
     {
 
         _pixel_samples_scale = 1.f / _samples_per_pixel;
@@ -115,9 +113,11 @@ public:
 
     void render(TGAImage& img, const HitTable& world)
     {
+#pragma omp parallel for
         for (int h = 0; h < _image_height; h++)
         {
-            int y = _image_height - 1 - h;
+            // int y = _image_height - 1 - h;
+            int y = h;
             glm::vec3 height_vector = static_cast<float>(y) * _pixel_delta_v;
             for (int w = 0; w < _image_width; w++)
             {
