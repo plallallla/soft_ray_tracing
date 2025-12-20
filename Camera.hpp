@@ -43,40 +43,6 @@ class Camera
         };
     }
 
-    bool hit_sphere(const Sphere& s, const Ray& r, float& t)
-    {
-        glm::vec3 ori = r.origin() - s._center;
-        float a = glm::dot(r.direction(), r.direction());
-        float b = 2.f * glm::dot(ori, r.direction());
-        float c = glm::dot(ori, ori) - s._radius * s._radius;
-        float delta = b * b - 4 * a * c;
-        if (delta < 0)
-        {
-            return false;
-        }
-        t = (-1.f * b - sqrt(delta)) / (2.f * a);
-        return true;
-    }
-
-    TGAColor RayColor(const Ray ray)
-    {
-        float t;
-        Sphere s{glm::vec3{0.f, 0.f, -1.f}, 0.5f};
-        if (hit_sphere(s, ray, t))
-        {
-            glm::vec3 normal = glm::normalize(ray.at(t) - s._center);
-            return TGAColor
-            {
-                static_cast<std::uint8_t>(255 * 0.5 * (normal.b + 1.f)), 
-                static_cast<std::uint8_t>(255 * 0.5 * (normal.g + 1.f)), 
-                static_cast<std::uint8_t>(255 * 0.5 * (normal.r + 1.f)),
-                255
-            };
-        }
-        auto n_dir = glm::normalize(ray.direction());
-        return interpolate_color((1. + n_dir.y) * .5f, TGAColor{255,255,255,255}, TGAColor{255,179,128,255});
-    }
-
     TGAColor ray_color(const Ray& light, const HitTable& world)
     {
         HitRecord record;
@@ -85,9 +51,9 @@ class Camera
             glm::vec3 normal = glm::normalize(record._normal);
             return TGAColor
             {
-                static_cast<std::uint8_t>(122.5 * (normal.x + 1.f)),
-                static_cast<std::uint8_t>(122.5 * (normal.y + 1.f)), 
-                static_cast<std::uint8_t>(122.5 * (normal.z + 1.f)), 
+                static_cast<std::uint8_t>(122.5f * (normal.b + 1.f)),
+                static_cast<std::uint8_t>(122.5f * (normal.g + 1.f)), 
+                static_cast<std::uint8_t>(122.5f * (normal.r + 1.f)), 
                 255
             };
         }
@@ -130,6 +96,7 @@ public:
         _defocus_disk_u = _u * defocus_radius;
         _defocus_disk_v = _v * defocus_radius;
     }
+
     void render(TGAImage& img, const HitTable& world)
     {
         for (int h = 0; h < _image_height; h++)
@@ -142,11 +109,11 @@ public:
                 glm::vec3 width_vector = static_cast<float>(x) * _pixel_delta_u;
                 glm::vec3 pixel_center = width_vector + height_vector + _pixel00_loc;
                 Ray light{_center, pixel_center - _center};
-                img.set(x, y, RayColor(light));
                 img.set(x, y, ray_color(light, world));
             }
         }
     }
+
     inline int get_image_width() { return _image_width; }
     inline int get_image_height() { return _image_height; }
 

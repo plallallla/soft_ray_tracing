@@ -25,8 +25,9 @@ public:
         if (!interval.surrounds(root)) root = (-1.f * b + sqrt(delta)) / (2.f * a);
         if (!interval.surrounds(root)) return false;
         record._t = root;
-        record._point = r.at(root);
-        record.set_face_normal(r, r.at(root) - _center);
+        record._point = r.at(record._t);
+        // record.set_face_normal(r, record._point - _center);
+        record._normal = record._point - _center;
         return true;
     }
 };
