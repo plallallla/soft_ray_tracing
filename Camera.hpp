@@ -3,13 +3,14 @@
 #include "Utility.hpp"
 #include "tgaimage.hpp"
 #include "Interval.hpp"
+#include "Material.hpp"
 #include <glm/geometric.hpp>
 #include <glm/trigonometric.hpp>
 
-#include "Sphere.hpp"
-
 constexpr glm::vec3 white = glm::vec3{1.f, 1.f, 1.f};
 constexpr glm::vec3 blue = glm::vec3{.5f, .7f, 1.f};
+
+class ScatterResult;
 
 class Camera
 {
@@ -17,7 +18,7 @@ class Camera
     int _image_width{500};
     int _image_height{500};
     int _samples_per_pixel{10};
-    int _max_depth{10};
+    int _max_depth{1};
     float _fov{90.f};
     glm::vec3 _lookfrom{0.,0.,0.};
     glm::vec3 _lookat{0.,0.,-1.};
@@ -54,16 +55,26 @@ class Camera
         return {_center, pixel_center - _center};
     }
 
-    glm::vec3 ray_color(const Ray& light, const HitTable& world)
+    glm::vec3 ray_color(const Ray& light, const HitTable& world, int depth)
     {
+        if (depth <= 0) return glm::vec3{ .0f, .0f, .0f };
         HitRecord record;
         if (world.hit(light, Interval{0, Interval::f_max}, record))
         {
+            ScatterResult result = record._material->scatter(light, record);
+            if (result)
+            {
+                return result._attenuation * ray_color(result._scattered_ray, world, depth - 1);
+            }
             glm::vec3 normal = glm::normalize(record._normal);
             return 0.5f * (normal + glm::vec3{1.f, 1.f, 1.f});
         }
-        glm::vec3 dir = glm::normalize(light.direction());
-        return interpolate_color((1. + dir.y) * .5f, white, blue);
+        return sky_color(glm::normalize(light.direction()));
+    }
+
+    glm::vec3 sky_color(const glm::vec3& direction)
+    {
+        return interpolate_color((1. + direction.y) * .5f, white, blue);
     }
 public:
     void init()
@@ -114,7 +125,7 @@ public:
                 glm::vec3 color{0.f, 0.f, 0.f};
                 for (int ct = 0; ct < _samples_per_pixel; ct++)
                 {
-                    color += ray_color(get_ray(static_cast<float>(x), static_cast<float>(y)), world);
+                    color += ray_color(get_ray(static_cast<float>(x), static_cast<float>(y)), world, _max_depth);
                 }
                 img.set(x, y, color * (1.f / _samples_per_pixel));
             }

@@ -7,10 +7,14 @@
 #include <memory>
 #include <vector>
 
+class Material;
+using MaterialPtr = std::shared_ptr<Material>;
+
 struct HitRecord
 {
     glm::vec3 _point;
     glm::vec3 _normal;
+    MaterialPtr _material;
     float _t;
     bool _is_front;
 
@@ -27,13 +31,13 @@ class HitTable
 public:    
     virtual bool hit(const Ray& r, Interval interval, HitRecord& record) const = 0;
 };
-using ht_ptr = std::shared_ptr<HitTable>;
+using HitTablePtr = std::shared_ptr<HitTable>;
 
 class HitTableList : public HitTable
 {
-    std::vector<ht_ptr> _list;
+    std::vector<HitTablePtr> _list;
 public:
-    void add(const ht_ptr& object)
+    void add(const HitTablePtr& object)
     {
         _list.push_back(object);
     }

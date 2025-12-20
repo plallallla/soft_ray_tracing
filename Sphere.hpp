@@ -4,14 +4,14 @@
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
 
-#include <iostream>
-
 class Sphere : public HitTable
 {
-public:
     glm::vec3 _center;
     float _radius;
+
+public:
     Sphere(glm::vec3 center, float radius) : _center{center}, _radius{radius} {}
+    MaterialPtr _material;
     
     virtual bool hit(const Ray& r, Interval interval, HitRecord& record) const override
     {
@@ -28,6 +28,7 @@ public:
         record._point = r.at(record._t);
         // record.set_face_normal(r, record._point - _center);
         record._normal = record._point - _center;
+        record._material = _material;
         return true;
     }
 };

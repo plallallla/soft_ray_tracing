@@ -46,7 +46,7 @@ public:
     {
         glm::vec3 in_unit_sphere = get_unit_vec3();
         if (glm::dot(in_unit_sphere, normal) > 0.0f) return in_unit_sphere;
-        else return -in_unit_sphere;
+        else return -1.f * in_unit_sphere;
     }
     
 private:    
@@ -54,3 +54,8 @@ private:
     std::random_device _rd;
     std::mt19937 _gen;    
 };
+
+inline bool is_zero_vec(const glm::vec3& vec)
+{
+    return std::fabs(vec.x) < 1e-8 && std::fabs(vec.y) < 1e-8 && std::fabs(vec.z) < 1e-8;
+}
