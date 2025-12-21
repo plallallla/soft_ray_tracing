@@ -18,7 +18,7 @@ class Camera
     int _image_width{500};
     int _image_height{500};
     int _samples_per_pixel{10};
-    int _max_depth{1};
+    int _max_depth{10};
     float _fov{90.f};
     glm::vec3 _lookfrom{0.,0.,0.};
     glm::vec3 _lookat{0.,0.,-1.};
@@ -54,55 +54,16 @@ class Camera
         glm::vec3 pixel_center = width_vector + height_vector + _pixel00_loc;
         return {_center, pixel_center - _center};
     }
-
-
-const glm::vec3 Sky(const Ray & ray) 
-{
-	auto normDir = glm::normalize(ray.direction());
-	float t = 0.5f * (normDir.y + 1.0f);
-
-	const glm::vec3 white(1.f);
-	const glm::vec3 blue(0.5, 0.7, 1);
-
-	return white * t + blue * (1.f - t); // 线性插值
-}
-
-glm::vec3 RandInSphere() 
-{
-    while (true)
-    {
-        glm::vec3 p
-        {
-            RANDOM.get_float(-1.f, 1.f),
-            RANDOM.get_float(-1.f, 1.f),
-            RANDOM.get_float(-1.f, 1.f),
-        };            
-        if (glm::dot(p, p) < 1.f) return p;
-    }
-}
-
-const glm::vec3 Trace(Ray& ray, const HitTableList& scene) 
-{
-	HitRecord rec;
-	if (scene.hit(ray, rec)) 
-    {
-		glm::vec3 dir = glm::normalize(rec._normal + RandInSphere()); // 漫反射
-		Ray newRay(rec._point, dir);
-		return 0.5f * Trace(newRay, scene); // 光照衰减一半
-	}
-	return Sky(ray);
-}
-
     
-    glm::vec3 ray_color(const Ray& light, const HitTable& world, int depth)
+    glm::vec3 ray_color(Ray& light, const HitTable& world, int depth)
     {
         if (depth <= 0) return glm::vec3{ .0f, .0f, .0f };
         HitRecord record;
-        // if (world.hit(light, Interval{0, Interval::f_max}, record))
-        // {
-        //     glm::vec3 dir = glm::normalize(record._normal + RandInSphere());
-        //     return 0.5f * ray_color({record._point, dir}, world, depth - 1);
-        // }
+        if (world.hit(light, record))
+        {
+            Ray reflected {record._point, RANDOM.cosine_weighted_random_hemisphere(record._normal)};
+            return 0.5f * ray_color(reflected, world, depth - 1);
+        }
         return sky_color(glm::normalize(light.direction()));
     }
 
@@ -159,9 +120,9 @@ public:
                 glm::vec3 color{0.f, 0.f, 0.f};
                 for (int ct = 0; ct < _samples_per_pixel; ct++)
                 {
-                    // color += ray_color(get_ray(static_cast<float>(x), static_cast<float>(y)), world, _max_depth);
                     Ray r = get_ray(static_cast<float>(x), static_cast<float>(y));
-                    color += Trace(r, world);
+                    // color += Trace(r, world);
+                    color += ray_color(r, world, _max_depth);
                 }
                 img.set(x, y, color * (1.f / _samples_per_pixel));
             }

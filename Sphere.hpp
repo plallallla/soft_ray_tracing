@@ -27,7 +27,6 @@ public:
         r.update_t_max(root);
         record._t = root;
         record._point = r.at(record._t);
-        // record._normal = (record._point - _center) / _radius;
         record.set_face_normal(r, record._point - _center);
         record._material = _material;
         return true;

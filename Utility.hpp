@@ -1,4 +1,5 @@
 #pragma once
+#include <glm/geometric.hpp>
 #include <glm/glm.hpp>
 #include <random>
 
@@ -41,6 +42,21 @@ public:
             if (len2 > 0.0f && len2 < 1.0f) return glm::normalize(p);
         }
     }
+
+    glm::vec3 cosine_weighted_random_hemisphere(const glm::vec3& normal) 
+    {
+        do 
+        {
+            glm::vec3 vec
+            {
+                get_float(-1.f, 1.f),
+                get_float(-1.f, 1.f),
+                get_float(-1.f, 1.f),
+            };
+            if (glm::dot(vec, vec) < 1.f) return glm::normalize(normal + vec);
+        }
+        while (true);
+    }    
     
 private:    
     SINGLETON(Random);
