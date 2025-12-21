@@ -1,11 +1,10 @@
 #pragma once
-#include "Ray.hpp"
-#include "Interval.hpp"
-
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
 #include <memory>
 #include <vector>
+
+#include "Ray.hpp"
 
 class Material;
 using MaterialPtr = std::shared_ptr<Material>;
@@ -20,8 +19,9 @@ struct HitRecord
 
     void set_face_normal(const Ray& r, const glm::vec3& outward_normal)
     {
-        _is_front = glm::dot(r.direction(), outward_normal) > 0;
+        _is_front = glm::dot(r.direction(), outward_normal) < 0;
         _normal = _is_front ? outward_normal : -1.f * outward_normal;
+        _normal = glm::normalize(_normal);
     }
 
 };
@@ -29,7 +29,7 @@ struct HitRecord
 class HitTable
 {
 public:    
-    virtual bool hit(const Ray& r, Interval interval, HitRecord& record) const = 0;
+    virtual bool hit(Ray& r, HitRecord& record) const = 0;
 };
 using HitTablePtr = std::shared_ptr<HitTable>;
 
@@ -41,19 +41,14 @@ public:
     {
         _list.push_back(object);
     }
-    virtual bool hit(const Ray& r, Interval range, HitRecord& record) const override
+    virtual bool hit(Ray& r, HitRecord& record) const override
     {
-        HitRecord temp_rec;
         bool hit_anything = false;
-        auto closest_so_far = range.get_max();
-
         for (const auto& obj : _list) 
         {
-            if (obj->hit(r, Interval{0.f, closest_so_far}, temp_rec)) 
+            if (obj->hit(r, record)) 
             {
                 hit_anything = true;
-                closest_so_far = temp_rec._t;
-                record = temp_rec;
             }
         }
         return hit_anything;

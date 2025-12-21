@@ -1,15 +1,14 @@
 #pragma once
 #include <limits>
 
-class Interval
+struct Interval
 {
     float _min{ std::numeric_limits<float>::min() };
     float _max{ std::numeric_limits<float>::max() };
-public:
-    Interval(float min_val, float max_val) : _min{min_val}, _max{max_val} {}
     Interval() = default;
-    inline bool contains(float val) { return _max >= val && _min <= val; }
-    inline bool surrounds(float val) { return _max > val && _min < val; }
+    Interval(float min_val, float max_val) : _min{min_val}, _max{max_val} {}
+    inline bool contains(float val) const { return _max >= val && _min <= val; }
+    inline bool surrounds(float val) const { return _max > val && _min < val; }
     inline float get_max() const { return _max; }
     inline float get_min() const { return _min; }
     static inline float f_max = std::numeric_limits<float>::max();

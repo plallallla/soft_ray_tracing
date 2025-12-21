@@ -13,7 +13,7 @@ public:
     Sphere(glm::vec3 center, float radius) : _center{center}, _radius{radius} {}
     MaterialPtr _material;
     
-    virtual bool hit(const Ray& r, Interval interval, HitRecord& record) const override
+    virtual bool hit(Ray& r, HitRecord& record) const override
     {
         glm::vec3 orign = r.origin() - _center;
         float a = glm::dot(r.direction(), r.direction());
@@ -22,10 +22,12 @@ public:
         float delta = b * b - 4 * a * c;
         if (delta < 0) return false;
         float root = (-1.f * b - sqrt(delta)) / (2.f * a);
-        if (!interval.surrounds(root)) root = (-1.f * b + sqrt(delta)) / (2.f * a);
-        if (!interval.surrounds(root)) return false;
+        if (!r.valid_t(root)) root = (-1.f * b + sqrt(delta)) / (2.f * a);
+        if (!r.valid_t(root)) return false;
+        r.update_t_max(root);
         record._t = root;
         record._point = r.at(record._t);
+        // record._normal = (record._point - _center) / _radius;
         record.set_face_normal(r, record._point - _center);
         record._material = _material;
         return true;

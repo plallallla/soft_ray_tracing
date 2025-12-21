@@ -41,13 +41,6 @@ public:
             if (len2 > 0.0f && len2 < 1.0f) return glm::normalize(p);
         }
     }
-   // 生成单位半球上的随机方向（用于漫反射）
-    glm::vec3 random_hemisphere_vec3(const glm::vec3& normal)
-    {
-        glm::vec3 in_unit_sphere = get_unit_vec3();
-        if (glm::dot(in_unit_sphere, normal) > 0.0f) return in_unit_sphere;
-        else return -1.f * in_unit_sphere;
-    }
     
 private:    
     SINGLETON(Random);
