@@ -6,7 +6,7 @@
 class Ray
 {
     glm::vec3 _origin;
-    glm::vec3 _direction;
+    glm::vec3 _direction; // 方向单位向量
     Interval _t_range{ .001f, Interval::f_max };
 public:
     Ray() = default;

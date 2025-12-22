@@ -42,7 +42,7 @@ public:
             if (len2 > 0.0f && len2 < 1.0f) return glm::normalize(p);
         }
     }
-
+    // TODO 改为逆变换采样
     glm::vec3 cosine_weighted_random_hemisphere(const glm::vec3& normal) 
     {
         do 

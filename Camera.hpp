@@ -2,7 +2,6 @@
 #include "HitTable.hpp"
 #include "Utility.hpp"
 #include "tgaimage.hpp"
-#include "Interval.hpp"
 #include "Material.hpp"
 #include <glm/geometric.hpp>
 #include <glm/trigonometric.hpp>
@@ -14,10 +13,11 @@ class ScatterResult;
 
 class Camera
 {
+    bool _enable_gama{true};
     float _aspect_ratio{1.f};
     int _image_width{500};
     int _image_height{500};
-    int _samples_per_pixel{10};
+    int _samples_per_pixel{100};
     int _max_depth{10};
     float _fov{90.f};
     glm::vec3 _lookfrom{0.,0.,0.};
@@ -27,7 +27,6 @@ class Camera
     float defocus_angle = 0.f;  // Variation angle of rays through each pixel
     float focus_dist = 10.f;    // Distance from camera lookfrom point to plane of perfect focus
 
-    float _pixel_samples_scale;  // Color scale factor for a sum of pixel samples
     glm::vec3 _center;               // Camera center
     glm::vec3 _pixel00_loc;          // Location of pixel 0, 0
     glm::vec3 _pixel_delta_u;        // Offset to pixel to the right
@@ -62,7 +61,10 @@ class Camera
         if (world.hit(light, record))
         {
             Ray reflected {record._point, RANDOM.cosine_weighted_random_hemisphere(record._normal)};
-            return 0.5f * ray_color(reflected, world, depth - 1);
+            ScatterResult result = record._material->scatter(light, record);
+            if (result) return result._attenuation * ray_color(result._scattered_ray, world, depth-1);
+            return {0, 0, 0};
+            // return 0.8f * ray_color(reflected, world, depth - 1);
         }
         return sky_color(glm::normalize(light.direction()));
     }
@@ -75,7 +77,6 @@ public:
     Camera()
     {
 
-        _pixel_samples_scale = 1.f / _samples_per_pixel;
 
         _center = _lookfrom;
 
@@ -118,13 +119,15 @@ public:
             {
                 int x = w;
                 glm::vec3 color{0.f, 0.f, 0.f};
+#pragma omp parallel for
                 for (int ct = 0; ct < _samples_per_pixel; ct++)
                 {
                     Ray r = get_ray(static_cast<float>(x), static_cast<float>(y));
-                    // color += Trace(r, world);
                     color += ray_color(r, world, _max_depth);
                 }
-                img.set(x, y, color * (1.f / _samples_per_pixel));
+                color *= (1.f / _samples_per_pixel);
+                if (_enable_gama) color = glm::pow(color, glm::vec3(1.0f / 2.2f));
+                img.set(x, y, color);
             }
         }
     }
