@@ -17,7 +17,7 @@ class Camera
     float _aspect_ratio{1.f};
     int _image_width{500};
     int _image_height{500};
-    int _samples_per_pixel{100};
+    int _samples_per_pixel{10};
     int _max_depth{10};
     float _fov{90.f};
     glm::vec3 _lookfrom{0.,0.,0.};

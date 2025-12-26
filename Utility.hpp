@@ -68,3 +68,13 @@ inline bool is_zero_vec(const glm::vec3& vec)
 {
     return std::fabs(vec.x) < 1e-8 && std::fabs(vec.y) < 1e-8 && std::fabs(vec.z) < 1e-8;
 }
+
+inline float schlick_approximation_fresnel(float f0, float cosine)
+{
+    return f0 + (1.f - f0) * std::pow(1.f - cosine, 5.f);
+}
+
+inline bool refract_prediction(float eta_ration, float cosine)
+{
+    return eta_ration * eta_ration * (1 - cosine * cosine) < 1;
+}

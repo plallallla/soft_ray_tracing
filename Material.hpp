@@ -1,4 +1,5 @@
 #pragma once
+#include <glm/common.hpp>
 #include <glm/geometric.hpp>
 #include <memory>
 #include "Ray.hpp"
@@ -46,25 +47,47 @@ public:
 
 };
 
-class Dielectric : Material
+class Dielectric : public Material
 {
-    float _refraction_index;
-    static float schlick_reflectance(float cosine, float refraction_index)
-    {
-        auto r0 = (1.f - refraction_index) / (1.f + refraction_index);
-        r0 *= r0;
-        return r0 + (1.f - r0) * std::pow((1.f - cosine), 5);        
-    }
+    float _refraction_index;// 介绍与空气折射率比值
+
 public:
     Dielectric(float refraction_index) : _refraction_index(refraction_index) {}
     virtual ScatterResult scatter(const Ray& ray_in, const HitRecord& record) const override
     {
-        float ri = record._is_front ? (1.f / _refraction_index) : _refraction_index;
-        float cos_theta = std::fmin(dot(-1.f * ray_in.direction(), record._normal), 0.0);
-        float sin_theta = std::sqrt(1.0 - cos_theta*cos_theta);
-        bool cannot_refract = ri * sin_theta > 1.0;
-        glm::vec3 direction = cannot_refract || schlick_reflectance(cos_theta, ri) > RANDOM.get_float(0, 1) ?
-        glm::reflect(ray_in.direction(), record._normal) : refract(ray_in.direction(), record._normal, ri);
-        return ScatterResult{ true, { 1.f, 1.f, 1.f }, { record._point, glm::normalize(direction) }};
+        glm::vec3 dir;
+        float eta_ratio = !record._is_front ? _refraction_index : 1.f / _refraction_index;
+        float cosion = glm::dot(-ray_in.direction(), record._normal);
+        bool has_refract = refract_prediction(eta_ratio, cosion);
+        float f0 = pow((1.f - eta_ratio) / (1.f + eta_ratio), 2);
+        float reflect = schlick_approximation_fresnel(f0, cosion);
+        if (!has_refract || reflect > RANDOM.get_float(0, 1)) dir = glm::normalize(glm::reflect(ray_in.direction(), record._normal));
+        else dir = glm::normalize(glm::refract(ray_in.direction(), record._normal, eta_ratio)); 
+        return ScatterResult{ true, {1.f, 1.f, 1.f}, {record._point, dir } };
     }
+
+    // static float reflectance(float cosine, float refraction_index) {
+    //     // Use Schlick's approximation for reflectance.
+    //     auto r0 = (1 - refraction_index) / (1 + refraction_index);
+    //     r0 = r0*r0;
+    //     return r0 + (1-r0)*std::pow((1 - cosine),5);
+    // }
+    // virtual ScatterResult scatter(const Ray& ray_in, const HitRecord& record) const override
+    // {
+    //     float ri = record._is_front ? (1.0/_refraction_index) : _refraction_index;
+
+    //     glm::vec3 unit_direction = glm::normalize(ray_in.direction());
+    //     float cos_theta = std::fmin(dot(-unit_direction, record._normal), 1.0);
+    //     float sin_theta = std::sqrt(1.0 - cos_theta*cos_theta);
+
+    //     bool cannot_refract = ri * sin_theta > 1.0;
+    //     glm::vec3 dir;
+
+    //     if (cannot_refract || reflectance(cos_theta, ri) > RANDOM.get_float(0, 1))
+    //         dir = reflect(unit_direction, record._normal);
+    //     else
+    //         dir = refract(unit_direction, record._normal, ri);
+
+    //     return ScatterResult{ true, {1.f, 1.f, 1.f}, {record._point, dir } };
+    // }    
 };
