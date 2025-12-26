@@ -1,4 +1,5 @@
 #pragma once
+#include <__math/roots.h>
 #include <glm/common.hpp>
 #include <glm/geometric.hpp>
 #include <memory>
@@ -40,54 +41,35 @@ public:
     Metal(const glm::vec3& albedo, float fuzz) : _albedo(albedo), _fuzz(fuzz < 1.f ? fuzz : 1.f) {}
     virtual ScatterResult scatter(const Ray& ray_in, const HitRecord& record) const override
     {
-        glm::vec3 reflected = glm::normalize(glm::reflect(ray_in.direction(), record._normal));
-        reflected = glm::normalize(reflected) + _fuzz * RANDOM.get_unit_vec3();
-        return ScatterResult{ true, _albedo, { record._point, glm::normalize(reflected) }};
+        glm::vec3 reflected = glm::reflect(ray_in.direction(), record._normal);
+        reflected = glm::normalize(reflected + _fuzz * RANDOM.get_unit_vec3());
+        return ScatterResult{ true, _albedo, { record._point, reflected }};
     }
 
 };
 
 class Dielectric : public Material
 {
-    float _refraction_index;// 介绍与空气折射率比值
-
+    float _refraction_index;// 介质与空气折射率比值
 public:
     Dielectric(float refraction_index) : _refraction_index(refraction_index) {}
     virtual ScatterResult scatter(const Ray& ray_in, const HitRecord& record) const override
     {
-        glm::vec3 dir;
-        float eta_ratio = !record._is_front ? _refraction_index : 1.f / _refraction_index;
-        float cosion = glm::dot(-ray_in.direction(), record._normal);
-        bool has_refract = refract_prediction(eta_ratio, cosion);
+        glm::vec3 I = glm::normalize(ray_in.direction());
+        // 考虑光线方向是 空气->介质 or 介质->空气
+        float eta_ratio = record._is_front ? (1.f / _refraction_index) : _refraction_index;
+        // 计算夹角
+        float cos_theta = glm::dot(-I, record._normal);
+        // 根据斯涅尔定律计算能否发生折射
+        bool has_refract = refract_prediction(eta_ratio, cos_theta);
+        // 菲涅耳系数
         float f0 = pow((1.f - eta_ratio) / (1.f + eta_ratio), 2);
-        float reflect = schlick_approximation_fresnel(f0, cosion);
-        if (!has_refract || reflect > RANDOM.get_float(0, 1)) dir = glm::normalize(glm::reflect(ray_in.direction(), record._normal));
-        else dir = glm::normalize(glm::refract(ray_in.direction(), record._normal, eta_ratio)); 
-        return ScatterResult{ true, {1.f, 1.f, 1.f}, {record._point, dir } };
+        // 计算真实反射率
+        float reflect_prob = schlick_approximation_fresnel(f0, cos_theta);
+        // 判断是发生反射还是折射并计算结果
+        glm::vec3 dir = !has_refract && reflect_prob > RANDOM.get_float(0, 1) ? 
+        glm::reflect(I, record._normal) : glm::refract(I, record._normal, eta_ratio);
+        return ScatterResult{ true, {1.f, 1.f, 1.f}, { record._point, dir } };
     }
-
-    // static float reflectance(float cosine, float refraction_index) {
-    //     // Use Schlick's approximation for reflectance.
-    //     auto r0 = (1 - refraction_index) / (1 + refraction_index);
-    //     r0 = r0*r0;
-    //     return r0 + (1-r0)*std::pow((1 - cosine),5);
-    // }
-    // virtual ScatterResult scatter(const Ray& ray_in, const HitRecord& record) const override
-    // {
-    //     float ri = record._is_front ? (1.0/_refraction_index) : _refraction_index;
-
-    //     glm::vec3 unit_direction = glm::normalize(ray_in.direction());
-    //     float cos_theta = std::fmin(dot(-unit_direction, record._normal), 1.0);
-    //     float sin_theta = std::sqrt(1.0 - cos_theta*cos_theta);
-
-    //     bool cannot_refract = ri * sin_theta > 1.0;
-    //     glm::vec3 dir;
-
-    //     if (cannot_refract || reflectance(cos_theta, ri) > RANDOM.get_float(0, 1))
-    //         dir = reflect(unit_direction, record._normal);
-    //     else
-    //         dir = refract(unit_direction, record._normal, ri);
-
-    //     return ScatterResult{ true, {1.f, 1.f, 1.f}, {record._point, dir } };
-    // }    
+    
 };
