@@ -8,9 +8,14 @@ class Sphere : public HitTable
 {
     glm::vec3 _center;
     float _radius;
+    AABB _box;
 
 public:
-    Sphere(glm::vec3 center, float radius) : _center{center}, _radius{radius} {}
+    Sphere(glm::vec3 center, float radius) : _center{center}, _radius{radius} 
+    {
+        glm::vec3 r = glm::vec3(radius);
+        _box.set(center - r, center + r);
+    }
     MaterialPtr _material;
     
     virtual bool hit(Ray& r, HitRecord& record) const override
@@ -30,5 +35,10 @@ public:
         record.set_face_normal(r, record._point - _center);
         record._material = _material;
         return true;
+    }
+
+    virtual AABB get_aabb() const override
+    {
+        return _box;
     }
 };

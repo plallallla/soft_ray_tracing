@@ -5,6 +5,7 @@
 #include <random>
 
 constexpr float pi = 3.14159265358979f;
+constexpr float epsilon = 1e-8;
 
 #define SINGLETON(ClassName) \
 public: \
@@ -74,7 +75,12 @@ private:
 
 inline bool is_zero_vec(const glm::vec3& vec)
 {
-    return std::fabs(vec.x) < 1e-8 && std::fabs(vec.y) < 1e-8 && std::fabs(vec.z) < 1e-8;
+    return std::fabs(vec.x) < epsilon && std::fabs(vec.y) < epsilon && std::fabs(vec.z) < epsilon;
+}
+
+inline bool has_zero_vec(const glm::vec3& vec)
+{
+    return std::fabs(vec.x) < epsilon || std::fabs(vec.y) < epsilon || std::fabs(vec.z) < epsilon;
 }
 
 inline float schlick_approximation_fresnel(float f0, float cos_theta)

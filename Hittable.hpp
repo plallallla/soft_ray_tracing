@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include "Ray.hpp"
+#include "AABB.hpp"
 
 class Material;
 using MaterialPtr = std::shared_ptr<Material>;
@@ -30,12 +30,14 @@ class HitTable
 {
 public:    
     virtual bool hit(Ray& r, HitRecord& record) const = 0;
+    virtual AABB get_aabb() const = 0;
 };
 using HitTablePtr = std::shared_ptr<HitTable>;
 
 class HitTableList : public HitTable
 {
     std::vector<HitTablePtr> _list;
+    AABB _box;
 public:
     void add(const HitTablePtr& object)
     {
@@ -53,4 +55,10 @@ public:
         }
         return hit_anything;
     }
+
+    virtual AABB get_aabb() const override
+    {
+        return _box;
+    }
+
 };
