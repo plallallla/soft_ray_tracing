@@ -6,6 +6,8 @@
 #include "Ray.hpp"
 #include "Utility.hpp"
 
+enum class AXIS{ X_AXIS, Y_AXIS, Z_AXIS };
+
 class AABB
 {
     Interval _slab_x;
@@ -31,6 +33,12 @@ class AABB
 
 public:
     AABB() = default;
+    
+    AABB(const Interval& x, const Interval& y, const Interval& z)
+    {
+        set({ x, y, z });
+    }
+
     AABB(const std::array<Interval, 3>& ranges)
     {
         set(ranges);
@@ -55,6 +63,18 @@ public:
         set(std::array<Interval, 3>{ Interval{p1.x,p2.x}, Interval{p1.y,p2.y}, Interval{p1.z,p2.z} });
     }
 
+    AXIS longest_axis() const
+    {
+        auto l = _slab_x.length();
+        auto ret = AXIS::X_AXIS;
+        if (l < _slab_y.length())
+        {
+            l = _slab_y.length();
+            ret = AXIS::Y_AXIS;
+        }
+        return l < _slab_z.length() ? AXIS::Z_AXIS : ret;
+    }
+
     // Slab Method
     bool hit(Ray& r)
     {
@@ -73,6 +93,16 @@ public:
     }
 
 };
+
+inline AABB operator+(const AABB& _1, const AABB& _2)
+{
+    return AABB
+    {
+        _1.get_slab_x() + _2.get_slab_x(),
+        _1.get_slab_y() + _2.get_slab_y(),
+        _1.get_slab_z() + _2.get_slab_z(),
+    };
+}
 
 inline AABB operator+(const AABB& box, const glm::vec3& offset) 
 {

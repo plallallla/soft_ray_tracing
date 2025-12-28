@@ -17,7 +17,7 @@ class Camera
     float _aspect_ratio{1.f};
     int _image_width{500};
     int _image_height{500};
-    int _samples_per_pixel{10};
+    int _samples_per_pixel{30};
     int _max_depth{10};
     float _fov{90.f};
     glm::vec3 _lookfrom{0.,0.,0.};
@@ -54,7 +54,7 @@ class Camera
         return {_center, pixel_center - _center};
     }
     
-    glm::vec3 ray_color(Ray& light, const HitTable& world, int depth)
+    glm::vec3 ray_color(Ray& light, HitTable& world, int depth)
     {
         if (depth <= 0) return glm::vec3{ .0f, .0f, .0f };
         HitRecord record;
@@ -109,7 +109,7 @@ public:
         _defocus_disk_v = _v * defocus_radius;
     }
 
-    void render(TGAImage& img, const HitTableList& world)
+    void render(TGAImage& img, HitTableList& world)
     {
 #pragma omp parallel for
         for (int h = 0; h < _image_height; h++)

@@ -29,7 +29,7 @@ struct HitRecord
 class HitTable
 {
 public:    
-    virtual bool hit(Ray& r, HitRecord& record) const = 0;
+    virtual bool hit(Ray& r, HitRecord& record) = 0;
     virtual AABB get_aabb() const = 0;
 };
 using HitTablePtr = std::shared_ptr<HitTable>;
@@ -43,7 +43,7 @@ public:
     {
         _list.push_back(object);
     }
-    virtual bool hit(Ray& r, HitRecord& record) const override
+    virtual bool hit(Ray& r, HitRecord& record) override
     {
         bool hit_anything = false;
         for (const auto& obj : _list) 

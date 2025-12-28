@@ -1,10 +1,11 @@
 #pragma once
 #include <limits>
+#include <cmath>
 
 struct Interval
 {
-    float _min{ std::numeric_limits<float>::min() };
-    float _max{ std::numeric_limits<float>::max() };
+    float _min{ std::numeric_limits<float>::max() };
+    float _max{ std::numeric_limits<float>::min() };
     Interval() = default;
     Interval(float min_val, float max_val) : _min{min_val}, _max{max_val} {}
     inline bool contains(float val) const { return _max >= val && _min <= val; }
@@ -23,20 +24,25 @@ struct Interval
     static inline float f_min = std::numeric_limits<float>::min();
 };
 
+inline Interval operator+(const Interval& _1, const Interval& _2) 
+{
+    return { std::fmin(_1._min, _2._min), std::fmax(_1._max, _2._max) };
+}
+
 inline Interval operator+(const Interval& ival, float displacement) 
 {
     return { ival._min + displacement, ival._max + displacement };
-}  
+}
 
 inline Interval operator+(float displacement, const Interval& ival) 
 {
     return { ival._min + displacement, ival._max + displacement };
-}  
+}
 
-static inline Interval EMPTY_INTERVAL = Interval
+inline static Interval EMPTY_INTERVAL;
+
+inline static Interval UNIVERSE_INTERVAL
 {
     std::numeric_limits<float>::max(),
     std::numeric_limits<float>::min(),
 };
-
-static inline Interval UNIVERSE_INTERVAL = Interval{};

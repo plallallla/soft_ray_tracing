@@ -18,7 +18,7 @@ public:
     }
     MaterialPtr _material;
     
-    virtual bool hit(Ray& r, HitRecord& record) const override
+    virtual bool hit(Ray& r, HitRecord& record) override
     {
         glm::vec3 orign = r.origin() - _center;
         float a = glm::dot(r.direction(), r.direction());

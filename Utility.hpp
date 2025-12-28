@@ -31,6 +31,18 @@ public:
         std::uniform_real_distribution<float> dis(min, max);
         return dis(_gen);
     }
+
+    // 生成随机颜色
+    glm::vec3 get_color()
+    {
+        return glm::vec3
+        {
+            get_float(0.f, 1.0f),
+            get_float(0.f, 1.0f),
+            get_float(0.f, 1.0f)
+        };
+    }
+
     // 拒绝采样法（Rejection Sampling）生成单位球面上的均匀随机方向
     glm::vec3 get_unit_vec3()
     {
@@ -46,26 +58,26 @@ public:
             if (len2 > 0.0f && len2 < 1.0f) return glm::normalize(p);
         }
     }
- 
-// 半球上的余弦加权采样
-glm::vec3 cosine_weighted_random_hemisphere(const glm::vec3& normal)
-{
-    // Step 1: 生成两个随机数作为采样器输入
-    float u_theta = get_float(.0f, 1.0f);
-    float u_phi = get_float(.0f, 1.0f);
-    // Step 2: 计算局部坐标系中的余弦加权采样
-    float r = std::sqrt(u_theta);
-    float phi = 2.0f * pi * u_phi;
-    float x = r * std::cos(phi);
-    float y = r * std::sin(phi);
-    float z = std::sqrt(std::max(0.0f, 1.0f - u_theta));
-    // Step 3: 构建ONB并计算最终采样结果
-    glm::vec3 n = glm::normalize(normal);
-    glm::vec3 v = std::abs(n.x) > 0.9f ? glm::vec3(0.0f, 1.0f, 0.0f) : glm::vec3(1.0f, 0.0f, 0.0f);
-    glm::vec3 t = glm::normalize(glm::cross(v, n));
-    glm::vec3 b = glm::cross(n, t);
-    return x * t + y * b + z * n;
-}
+    
+    // 半球上的余弦加权采样
+    glm::vec3 cosine_weighted_random_hemisphere(const glm::vec3& normal)
+    {
+        // Step 1: 生成两个随机数作为采样器输入
+        float u_theta = get_float(.0f, 1.0f);
+        float u_phi = get_float(.0f, 1.0f);
+        // Step 2: 计算局部坐标系中的余弦加权采样
+        float r = std::sqrt(u_theta);
+        float phi = 2.0f * pi * u_phi;
+        float x = r * std::cos(phi);
+        float y = r * std::sin(phi);
+        float z = std::sqrt(std::max(0.0f, 1.0f - u_theta));
+        // Step 3: 构建ONB并计算最终采样结果
+        glm::vec3 n = glm::normalize(normal);
+        glm::vec3 v = std::abs(n.x) > 0.9f ? glm::vec3(0.0f, 1.0f, 0.0f) : glm::vec3(1.0f, 0.0f, 0.0f);
+        glm::vec3 t = glm::normalize(glm::cross(v, n));
+        glm::vec3 b = glm::cross(n, t);
+        return x * t + y * b + z * n;
+    }
     
 private:    
     SINGLETON(Random);
