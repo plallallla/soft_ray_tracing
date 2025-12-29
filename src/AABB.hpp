@@ -33,6 +33,14 @@ class AABB
 
 public:
     AABB() = default;
+
+    AABB(const glm::vec3& p1, const glm::vec3& p2)
+    {
+        Interval x = p1.x < p2.x ? Interval{ p1.x, p2.x } : Interval{ p2.x, p1.x };
+        Interval y = p1.y < p2.y ? Interval{ p1.y, p2.y } : Interval{ p2.y, p1.y };
+        Interval z = p1.z < p2.z ? Interval{ p1.z, p2.z } : Interval{ p2.z, p1.z };
+        set({ x, y, z });
+    }
     
     AABB(const Interval& x, const Interval& y, const Interval& z)
     {

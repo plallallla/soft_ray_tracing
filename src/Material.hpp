@@ -1,6 +1,7 @@
 #pragma once
 #include <__math/roots.h>
 #include <glm/common.hpp>
+#include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
 #include <memory>
 #include "Ray.hpp"
@@ -18,7 +19,8 @@ struct ScatterResult
 class Material
 {
 public:
-    virtual ScatterResult scatter(const Ray& ray_in, const HitRecord& record) const = 0;
+    virtual ScatterResult scatter(const Ray& ray_in, const HitRecord& record) const { return {}; };
+    virtual glm::vec3 emitted(const glm::vec2 uv, const glm::vec3& p) const { return glm::vec3{ 0.f, 0.f, 0.f}; };
 };
 using MaterialPtr = std::shared_ptr<Material>;
 

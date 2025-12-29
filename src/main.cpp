@@ -2,12 +2,11 @@
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
 #include <memory>
-#include "Material.hpp"
-#include "Utility.hpp"
-#include "tgaimage.hpp"
 
+#include "Material.hpp"
+#include "Texture.hpp"
+#include "tgaimage.hpp"
 #include "Camera.hpp"
-#include "Sphere.hpp"
 
 int main(int, char**)
 {
@@ -36,9 +35,24 @@ int main(int, char**)
 
     Camera camera;
     TGAImage framebuffer(camera.get_image_width(), camera.get_image_height(), TGAImage::RGB);
-    camera.render(framebuffer, world);
-    framebuffer.write_tga_file("ray_trace.tga");
-    system("open ray_trace.tga");    
+    // camera.render(framebuffer, world);
+    // framebuffer.write_tga_file("ray_trace.tga");
+    ImgTexture img{"rock.png"};
+
+    for (int i = 0; i < framebuffer.width(); i++)
+    {
+        for (int j = 0; j < framebuffer.height(); j++)
+        {
+            glm::vec2 uv{ float(i) / framebuffer.width(), float(j) / framebuffer.height() };
+            glm::vec3 rlt = img.value(uv, glm::vec3(0));
+            framebuffer.set(i, j, rlt);
+        }
+    }
+    framebuffer.write_tga_file("ray_trace___.tga");
+    system("open ray_trace___.tga");    
+
+
+
 
 }
 
