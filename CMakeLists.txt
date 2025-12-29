@@ -5,6 +5,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 find_package(glm CONFIG REQUIRED)
 
-add_executable(soft_ray_tracing main.cpp)
+add_executable(soft_ray_tracing src/main.cpp)
 
 target_link_libraries(soft_ray_tracing PRIVATE glm::glm)

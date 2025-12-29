@@ -63,8 +63,7 @@ class Camera
             Ray reflected {record._point, RANDOM.cosine_weighted_random_hemisphere(record._normal)};
             ScatterResult result = record._material->scatter(light, record);
             if (result) return result._attenuation * ray_color(result._scattered_ray, world, depth-1);
-            return {0, 0, 0};
-            // return 0.8f * ray_color(reflected, world, depth - 1);
+            return glm::vec3{ .0f, .0f, .0f };
         }
         return sky_color(glm::normalize(light.direction()));
     }
