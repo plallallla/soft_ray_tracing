@@ -13,6 +13,7 @@ class ScatterResult;
 
 class Camera
 {
+    bool _enable_hdr{true};
     bool _enable_gama{true};
     float _aspect_ratio{1.f};
     int _image_width{500};
@@ -124,6 +125,7 @@ public:
                     color += ray_color(r, world, _max_depth);
                 }
                 color *= (1.f / _samples_per_pixel);
+                if (_enable_hdr) color = glm::vec3(color.x/(1.f+color.x), color.y/(1.f+color.y), color.z/(1.f+color.z));
                 if (_enable_gama) color = glm::pow(color, glm::vec3(1.0f / 2.2f));
                 img.set(x, y, color);
             }
