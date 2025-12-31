@@ -1,4 +1,5 @@
 #pragma once
+#include <glm/detail/qualifier.hpp>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
 #include <memory>
@@ -37,16 +38,23 @@ public:
     virtual AABB get_aabb() const { return _box; }
 };
 using HitTablePtr = std::shared_ptr<HitTable>;
+using HitTablePtrs = std::vector<HitTablePtr>;
 
 class HitTableList : public HitTable
 {
-    std::vector<HitTablePtr> _list;
+    HitTablePtrs _list;
 public:
     void add(const HitTablePtr& object)
     {
         _list.push_back(object);
         _box = _box + object->get_aabb();
     }
+
+    void add(const HitTablePtrs& objects)
+    {
+        _list.insert(_list.end(), objects.begin(), objects.end());
+    }
+    
     virtual bool hit(Ray& r, HitRecord& record) override
     {
         bool hit_anything = false;
@@ -270,3 +278,25 @@ public:
         return true;
     }    
 };
+
+inline HitTableList CreateBox(uint length, uint width, uint height, MaterialPtr material)
+{
+    HitTableList box;
+    glm::vec3 p{ length / 2.f, width / 2.f, height / 2.f };
+    glm::vec3 x{ length, 0.f, 0.f };
+    glm::vec3 y{ 0.f, width, 0.f };
+    glm::vec3 z{ 0.f, 0.f, height };
+    std::vector<HitTablePtr> quads;
+    quads.push_back(std::make_shared<Quad>(p, x, y));
+    quads.push_back(std::make_shared<Quad>(p, x, z));
+    quads.push_back(std::make_shared<Quad>(p, z, y));
+    p *= -1;
+    x *= -1;
+    y *= -1;
+    z *= -1;
+    quads.push_back(std::make_shared<Quad>(p, x, y));
+    quads.push_back(std::make_shared<Quad>(p, x, z));
+    quads.push_back(std::make_shared<Quad>(p, z, y));
+    for (auto& q : quads) box.add(q);
+    return box;
+}

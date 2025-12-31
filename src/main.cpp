@@ -1,4 +1,5 @@
 #include <csetjmp>
+#include <glm/detail/qualifier.hpp>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
 #include <memory>
@@ -35,10 +36,11 @@ int main(int, char**)
     // world.add(std::make_shared<Sphere>(ground));
 
 
-    Quad q1{glm::vec3(0.f, 0.f, -4.f), glm::vec3(1.5f, 0.f, 0.f), glm::vec3(0, 1.f, 0)};
-    q1._material = light;
+    HitTableList box = CreateBox(1.f, 1.f, 1.f, ground_mat);
+    // auto unit_quad = std::make_shared<Quad>(glm::vec3(0.f, 0.f, -4.f), glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f, 2.f, 0.f));
+    // unit_quad->_material = ground_mat;
 
-    world.add(std::make_shared<Quad>(q1));
+    world.add(std::make_shared<HitTableList>(box));
     // world.add(std::make_shared<Translate>(q, glm::vec3{1.f,1.f,0.f}));
     // world.add(std::make_shared<Translate>(q, glm::vec3{-1.f,-1.f,0.f}));
     // world.add(std::make_shared<RotateY>(q, 45.0f));
