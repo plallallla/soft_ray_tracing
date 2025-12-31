@@ -18,7 +18,7 @@ class Camera
     float _aspect_ratio{1.f};
     int _image_width{500};
     int _image_height{500};
-    int _samples_per_pixel{30};
+    int _samples_per_pixel{500};
     int _max_depth{10};
     float _fov{90.f};
     glm::vec3 _lookfrom{0.,0.,0.};
@@ -75,8 +75,6 @@ class Camera
 public:
     Camera()
     {
-
-
         _center = _lookfrom;
 
         // Determine viewport dimensions.
@@ -110,7 +108,7 @@ public:
 
     void render(TGAImage& img, HitTableList& world)
     {
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic, 32)
         for (int h = 0; h < _image_height; h++)
         {
             int y = h;
@@ -118,7 +116,6 @@ public:
             {
                 int x = w;
                 glm::vec3 color{0.f, 0.f, 0.f};
-#pragma omp parallel for
                 for (int ct = 0; ct < _samples_per_pixel; ct++)
                 {
                     Ray r = get_ray(static_cast<float>(x), static_cast<float>(y));
