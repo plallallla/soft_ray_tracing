@@ -119,23 +119,18 @@ class Quad : public HitTable
     glm::vec3 _normal;
 public:
     MaterialPtr _material;
-    Quad(const glm::vec3& Q, const glm::vec3& u, const glm::vec3& v)
+    Quad(const glm::vec3& Q, const glm::vec3& u, const glm::vec3& v) : _Q{Q}, _u {u}, _v{v}
     {
         glm::vec3 n = glm::cross(u, v);
         _normal = glm::normalize(n);
-        _D = dot(_normal, Q);
-        _w = n / dot(n,n);
-
-        AABB box1 = AABB{Q, Q + u + v};
-        AABB box2 = AABB(Q + u, Q + v);
-        _box = box1 + box2;
+        _D = glm::dot(_normal, Q);
+        _w = n / glm::dot(n, n);
+        _box = AABB{Q, Q + u + v} + AABB{Q + u, Q + v};
     }
 
     bool is_interior(float a, float b, HitRecord& rec) const 
     {
-        Interval unit_interval{ 0., 1. };
-        // Given the hit point in plane coordinates, return false if it is outside the
-        // primitive, otherwise set the hit record UV coordinates and return true.
+        static const Interval unit_interval{ 0.f, 1.f };
         if (!unit_interval.contains(a) || !unit_interval.contains(b)) return false;
         rec._uv = { a, b };
         return true;
@@ -143,36 +138,26 @@ public:
 
     virtual bool hit(Ray& r, HitRecord& record) override
     {
+        // 计算发现在光源方向的投影
         auto denom = glm::dot(_normal, r.direction());
-
-        // No hit if the ray is parallel to the plane.
+        // 平行必不相交
         if (std::fabs(denom) < 1e-8) return false;
-
-        // Return false if the hit point parameter t is outside the ray interval.
+        // 计算交点
         auto t = (_D - glm::dot(_normal, r.origin())) / denom;
+        // 非法交点说明不相交
         if (!r.valid_t(t)) return false;
-            
-
-        // Determine if the hit point lies within the planar shape using its plane coordinates.
-        auto intersection = r.at(t);
-        auto planar_hitpt_vector = intersection - _Q;
-        auto alpha = dot(_w, cross(planar_hitpt_vector, _v));
-        auto beta = dot(_w, cross(_u, planar_hitpt_vector));
-
+        // 计算平面内的局部坐标
+        glm::vec3 P = r.at(t);
+        glm::vec3 P_Q = P - _Q;
+        float alpha = glm::dot(_w, glm::cross(P_Q, _v));// α = _w · ((P - _Q) × _v)
+        float beta = glm::dot(_w, glm::cross(_u, P_Q));// β = _w · (_u × (P - _Q))
+        // 非法坐标 说明这一点值不在区间内
         if (!is_interior(alpha, beta, record)) return false;
-
-        // Ray hits the 2D shape; set the rest of the hit record and return true.
+        // 更新命中点
         r.update_t_max(t);
-        record._point = intersection;
+        record._point = P;
         record._material = _material;
         record.set_face_normal(r, _normal);
-
         return true;
     }    
 };
-
-// class Object : public HitTable
-// {
-//     std::vector<glm::vec3> _vertex;
-//     std::vector<glm::vec3> _index;
-// };
