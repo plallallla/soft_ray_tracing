@@ -15,18 +15,21 @@ inline HitTableList cornell_box()
     auto depth = -6.f;
     auto length = -7.f;
     auto half_length = 3.5f;
+    auto light_length = -2.5f;
+    auto half_light_length = 1.25f;
 
-
+    // world.add(std::make_shared<Quad>(
+    //     glm::vec3(half_length, half_length, -6.f), glm::vec3(length, 0.f, 0.f), glm::vec3(0.f, length, 0.f), white));
+    // world.add(std::make_shared<Quad>(
+    //     glm::vec3(half_length, half_length, -6.f), glm::vec3(length, 0.f, 0.f), glm::vec3(0.f, 0.f, -length), white));  
+    // world.add(std::make_shared<Quad>(
+    //     glm::vec3(-half_length, -half_length, -6.f), glm::vec3(-length, 0.f, 0.f), glm::vec3(0.f, 0.f, -length), white));                
+    // world.add(std::make_shared<Quad>(
+    //     glm::vec3(half_length, half_length, -6.f), glm::vec3(0.f, length, 0.f), glm::vec3(0.f, 0.f, -length), red));         
+    // world.add(std::make_shared<Quad>(
+    //     glm::vec3(-half_length, -half_length, -6.f), glm::vec3(0.f, -length, 0.f), glm::vec3(0.f, 0.f, -length), green));         
     world.add(std::make_shared<Quad>(
-        glm::vec3(half_length, half_length, -6.f), glm::vec3(length, 0.f, 0.f), glm::vec3(0.f, length, 0.f), white));
-    world.add(std::make_shared<Quad>(
-        glm::vec3(half_length, half_length, -6.f), glm::vec3(length, 0.f, 0.f), glm::vec3(0.f, 0.f, -length), white));  
-    world.add(std::make_shared<Quad>(
-        glm::vec3(-half_length, -half_length, -6.f), glm::vec3(-length, 0.f, 0.f), glm::vec3(0.f, 0.f, -length), white));                
-    world.add(std::make_shared<Quad>(
-        glm::vec3(half_length, half_length, -6.f), glm::vec3(0.f, length, 0.f), glm::vec3(0.f, 0.f, -length), red));         
-    world.add(std::make_shared<Quad>(
-        glm::vec3(-half_length, -half_length, -6.f), glm::vec3(0.f, -length, 0.f), glm::vec3(0.f, 0.f, -length), green));         
+        glm::vec3(-0.5f, 1e-4 - half_length, -3.75f), glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f, 0.f, -1.f), light));  
 
 
     // shared_ptr<hittable> box1 = box(point3(0,0,0), point3(165,330,165), white);
