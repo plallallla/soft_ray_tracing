@@ -6,7 +6,7 @@
 
 #include "HitTable.hpp"
 #include "Material.hpp"
-#include "Texture.hpp"
+#include "Transform.hpp"
 #include "tgaimage.hpp"
 #include "Camera.hpp"
 
@@ -36,11 +36,13 @@ int main(int, char**)
     // world.add(std::make_shared<Sphere>(ground));
 
 
-    HitTableList box = CreateBox(1.f, 1.f, 1.f, ground_mat);
     // auto unit_quad = std::make_shared<Quad>(glm::vec3(0.f, 0.f, -4.f), glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f, 2.f, 0.f));
     // unit_quad->_material = ground_mat;
 
-    world.add(std::make_shared<HitTableList>(box));
+    HitTablePtr box = CreateBox(1.f, 1.f, 1.f, ground_mat);
+    box = apply_transform<RotateY>(box, 45.f);
+    box = apply_transform<Translate>(box, glm::vec3{0.f, 0.f, -4.f});
+    world.add(box);
     // world.add(std::make_shared<Translate>(q, glm::vec3{1.f,1.f,0.f}));
     // world.add(std::make_shared<Translate>(q, glm::vec3{-1.f,-1.f,0.f}));
     // world.add(std::make_shared<RotateY>(q, 45.0f));
