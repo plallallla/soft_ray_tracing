@@ -7,6 +7,7 @@
 #include "Ray.hpp"
 #include "Utility.hpp"
 #include "HitTable.hpp"
+#include "Texture.hpp"
 
 struct ScatterResult
 {
@@ -74,4 +75,17 @@ public:
         return ScatterResult{ true, {1.f, 1.f, 1.f}, { record._point, dir } };
     }
     
+};
+
+class DiffuseLight : public Material
+{
+private:
+    TexturePtr _texture;
+public:
+    DiffuseLight(TexturePtr texture) : _texture{texture} {}
+    DiffuseLight(const glm::vec3& color) : _texture{std::make_shared<SolidColor>(color)} {}
+    virtual glm::vec3 emitted(const glm::vec2 uv, const glm::vec3& p) const override 
+    {
+        return _texture->value(uv, p);
+    }
 };

@@ -11,6 +11,7 @@ public:
     virtual ~Texture() = default;
     virtual glm::vec3 value(const glm::vec2& uv, const glm::vec3& point) const = 0;
 };
+using TexturePtr = std::shared_ptr<Texture>;
 
 class SolidColor : public Texture
 {
@@ -18,10 +19,7 @@ class SolidColor : public Texture
 public:
     virtual ~SolidColor() = default;
     SolidColor(const glm::vec3& albedo) : _albedo{albedo} {}
-    virtual glm::vec3 value(const glm::vec2& uv, const glm::vec3& point) const override
-    {
-        return _albedo;
-    }
+    virtual glm::vec3 value(const glm::vec2& uv, const glm::vec3& point) const override { return _albedo; }
 };
 
 class ImgTexture : public Texture

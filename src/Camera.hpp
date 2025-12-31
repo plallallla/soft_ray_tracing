@@ -56,22 +56,21 @@ class Camera
     
     glm::vec3 ray_color(Ray& light, HitTable& world, int depth)
     {
+        // 结束递归
         if (depth <= 0) return glm::vec3{ .0f, .0f, .0f };
         HitRecord record;
-        if (world.hit(light, record))
-        {
-            Ray reflected {record._point, RANDOM.cosine_weighted_random_hemisphere(record._normal)};
-            ScatterResult result = record._material->scatter(light, record);
-            if (result) return result._attenuation * ray_color(result._scattered_ray, world, depth-1);
-            return glm::vec3{ .0f, .0f, .0f };
-        }
-        return sky_color(glm::normalize(light.direction()));
+        // 未命中物体 击中背景天空盒
+        if (!world.hit(light, record)) return sky_color(glm::normalize(light.direction()));
+        // 计算自发光项
+        glm::vec3 emitted = record._material->emitted(record._uv, record._point);
+        // 计算散射光项
+        auto scatter_result = record._material->scatter(light, record);
+        if (!scatter_result) return emitted;
+        return emitted + scatter_result._attenuation * ray_color(scatter_result._scattered_ray, world, depth - 1);
     }
 
-    glm::vec3 sky_color(const glm::vec3& direction)
-    {
-        return interpolate_color((1. + direction.y) * .5f, white, blue);
-    }
+    glm::vec3 sky_color(const glm::vec3& direction) { return interpolate_color((1. + direction.y) * .5f, white, blue); }
+    
 public:
     Camera()
     {

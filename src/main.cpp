@@ -22,7 +22,7 @@ int main(int, char**)
     
     auto ground_mat = std::make_shared<Lambertian>(glm::vec3{.5f, .5f, .0f});
 
-
+    auto light = std::make_shared<DiffuseLight>(glm::vec3(1.f, 1.f, 0.f));
 
 
 
@@ -36,10 +36,9 @@ int main(int, char**)
 
 
     Quad q1{glm::vec3(0.f, 0.f, -4.f), glm::vec3(1.5f, 0.f, 0.f), glm::vec3(0, 1.f, 0)};
-    q1._material = l;
+    q1._material = light;
 
-    auto q = std::make_shared<Quad>(q1);
-    // world.add(q);
+    world.add(std::make_shared<Quad>(q1));
     // world.add(std::make_shared<Translate>(q, glm::vec3{1.f,1.f,0.f}));
     // world.add(std::make_shared<Translate>(q, glm::vec3{-1.f,-1.f,0.f}));
     // world.add(std::make_shared<RotateY>(q, 45.0f));

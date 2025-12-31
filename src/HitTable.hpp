@@ -45,6 +45,7 @@ public:
     void add(const HitTablePtr& object)
     {
         _list.push_back(object);
+        _box = _box + object->get_aabb();
     }
     virtual bool hit(Ray& r, HitRecord& record) override
     {
