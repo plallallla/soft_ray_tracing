@@ -3,6 +3,8 @@
 #include "HitTable.hpp"
 #include "Material.hpp"
 #include "Transform.hpp"
+#include "BVHnode.hpp"
+#include <memory>
 
 inline HitTableList cornell_box()
 {

@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <glm/detail/qualifier.hpp>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
@@ -44,6 +45,7 @@ class HitTableList : public HitTable
 {
     HitTablePtrs _list;
 public:
+    size_t size() const { return _list.size(); }
     void add(const HitTablePtr& object)
     {
         _list.push_back(object);
@@ -66,6 +68,11 @@ public:
             }
         }
         return hit_anything;
+    }
+
+    operator std::vector<HitTablePtr>&()
+    {
+        return _list;
     }
 
 };

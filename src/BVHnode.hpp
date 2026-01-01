@@ -3,7 +3,6 @@
 #include <cstddef>
 #include <memory>
 #include <unordered_map>
-#include <vector>
 #include "HitTable.hpp"
 #include "AABB.hpp"
 
@@ -29,7 +28,8 @@ class BVHnode : public HitTable
     AABB _box;
     static std::unordered_map<AXIS, box_compare> _compare;
 public:
-    BVHnode(std::vector<HitTablePtr>& objects, size_t begin, size_t end)
+    BVHnode(HitTablePtrs& objects) : BVHnode{objects, 0, objects.size() } {}
+    BVHnode(HitTablePtrs& objects, size_t begin, size_t end)
     {
         for (int i = begin; i != end; i++)
         {
@@ -57,23 +57,24 @@ public:
     virtual bool hit(Ray& r, HitRecord& record) override
     {
         if (!_box.hit(r)) return false;
-
-        bool hit_left = _left->hit(r, record);
-        bool hit_anything = hit_left;
-        if (hit_left) 
-        {
-            r.update_t_max(record._t);
-        }
-        HitRecord right_record;
-        if (_right->hit(r, right_record)) 
-        {
-            if (!hit_left || right_record._t < record._t) 
-            {
-                record = right_record;
-            }
-            hit_anything = true;
-        }
-        return hit_anything;
+        HitRecord l_record;
+        HitRecord r_record;
+        if (!_left->hit(r, l_record) && !_right->hit(r, r_record)) return false;
+        record = r.get_t_max() == l_record._t ? l_record : r_record;
+        return true;
+        // bool hit_left = _left->hit(r, record);
+        // bool hit_anything = hit_left;
+        // if (hit_left) r.update_t_max(record._t);
+        // HitRecord right_record;
+        // if (_right->hit(r, right_record)) 
+        // {
+        //     if (!hit_left || right_record._t < record._t) 
+        //     {
+        //         record = right_record;
+        //     }
+        //     hit_anything = true;
+        // }
+        // return hit_anything;
     }
 
     virtual AABB get_aabb() const override { return _box; }

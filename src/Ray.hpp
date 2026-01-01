@@ -16,5 +16,6 @@ public:
     glm::vec3 direction() const { return _direction; }
     Interval get_t_range() const { return _t_range; }
     void update_t_max(float t) { _t_range._max = t; }
+    float get_t_max() const { return _t_range._max; }
     bool valid_t(float t) const { return _t_range.surrounds(t); }
 };
