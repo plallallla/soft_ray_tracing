@@ -6,7 +6,7 @@
 
 这是一个基于 C++ 实现的 CPU 端渲染的光线追踪算法，旨在复现光线追踪算法中的重要核心内容，最终输出的测试场景为 Cornell box
 
-![example](image/example.jpg)
+![example](image/ray_trace.png)
 
 本项目包含以下实现要点
 

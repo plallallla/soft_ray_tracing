@@ -172,18 +172,60 @@ public:
     }    
 };
 
-inline HitTablePtr CreateBox(uint length, uint width, uint height, MaterialPtr material)
+inline HitTablePtr create_box(float x_len, float y_height, float z_depth, MaterialPtr material)
 {
     HitTableList box;
-    glm::vec3 p{ length / 2.f, width / 2.f, height / 2.f };
-    glm::vec3 x{ length, 0.f, 0.f };
-    glm::vec3 y{ 0.f, width, 0.f };
-    glm::vec3 z{ 0.f, 0.f, height };
-    box.add(std::make_shared<Quad>(-p, x, y, material));
-    box.add(std::make_shared<Quad>(-p, x, z, material));
-    box.add(std::make_shared<Quad>(-p, z, y, material));
-    box.add(std::make_shared<Quad>(p, -x, -y, material));
-    box.add(std::make_shared<Quad>(p, -x, -z, material));
-    box.add(std::make_shared<Quad>(p, -z, -y, material));
+    float hx = x_len / 2.0f;
+    float hy = y_height / 2.0f;
+    float hz = z_depth / 2.0f;
+
+    // 左面 (x = -hx), 法向量 (-1, 0, 0)
+    box.add(std::make_shared<Quad>(
+        glm::vec3(-hx, -hy, -hz),
+        glm::vec3(0, 0, z_depth),
+        glm::vec3(0, y_height, 0),
+        material
+    ));
+
+    // 右面 (x = +hx), 法向量 (+1, 0, 0)
+    box.add(std::make_shared<Quad>(
+        glm::vec3(hx, -hy, -hz),
+        glm::vec3(0, y_height, 0),
+        glm::vec3(0, 0, z_depth),
+        material
+    ));
+
+    // 下面 (y = -hy), 法向量 (0, -1, 0)
+    box.add(std::make_shared<Quad>(
+        glm::vec3(-hx, -hy, -hz),
+        glm::vec3(x_len, 0, 0),
+        glm::vec3(0, 0, z_depth),
+        material
+    ));
+
+    // 上面 (y = +hy), 法向量 (0, +1, 0)
+    box.add(std::make_shared<Quad>(
+        glm::vec3(-hx, hy, -hz),
+        glm::vec3(0, 0, z_depth),
+        glm::vec3(x_len, 0, 0),
+        material
+    ));
+
+    // 后面 (z = -hz), 法向量 (0, 0, -1)
+    box.add(std::make_shared<Quad>(
+        glm::vec3(-hx, -hy, -hz),
+        glm::vec3(x_len, 0, 0),
+        glm::vec3(0, y_height, 0),
+        material
+    ));
+
+    // 前面 (z = +hz), 法向量 (0, 0, +1)
+    box.add(std::make_shared<Quad>(
+        glm::vec3(-hx, -hy, hz),
+        glm::vec3(0, y_height, 0),
+        glm::vec3(x_len, 0, 0),
+        material
+    ));
+
     return std::make_shared<HitTableList>(box);
 }

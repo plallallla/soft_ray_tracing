@@ -121,7 +121,7 @@ constexpr bool is_allowed_transform_v
 };
 
 template<typename Transform, typename... Args>
-HitTablePtr apply_transform(const HitTablePtr& obj, Args&&... args)
+HitTablePtr transform(const HitTablePtr& obj, Args&&... args)
 {
     static_assert(is_allowed_transform_v<Transform>, "Transform type not allowed!");
     return std::make_shared<Transform>(obj, std::forward<Args>(args)...);

@@ -20,9 +20,9 @@ class Camera
     int _image_height{500};
     int _samples_per_pixel{500};
     int _max_depth{10};
-    float _fov{90.f};
+    float _fov{45.f};
     glm::vec3 _lookfrom{0.,0.,0.};
-    glm::vec3 _lookat{0.,0.,-1.};
+    glm::vec3 _lookat{0.,0.,-3.f};
     glm::vec3 _vup{0.,1.,0.};
 
     float defocus_angle = 0.f;  // Variation angle of rays through each pixel
