@@ -83,6 +83,14 @@ public:
         return l < _slab_z.length() ? AXIS::Z_AXIS : ret;
     }
 
+    float area() const
+    {
+        auto x = _slab_x.length();
+        auto y = _slab_x.length();
+        auto z = _slab_x.length();
+        return x * y + x * z + y * z;
+    }
+
     // Slab Method
     bool hit(Ray& r)
     {
