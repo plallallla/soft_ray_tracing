@@ -57,11 +57,7 @@ public:
     virtual bool hit(Ray& r, HitRecord& record) override
     {
         if (!_box.hit(r)) return false;
-        HitRecord l_record;
-        HitRecord r_record;
-        if (!_left->hit(r, l_record) && !_right->hit(r, r_record)) return false;
-        record = r.get_t_max() == l_record._t ? l_record : r_record;
-        return true;
+        return _left->hit(r, record) || _right->hit(r, record);
         // bool hit_left = _left->hit(r, record);
         // bool hit_anything = hit_left;
         // if (hit_left) r.update_t_max(record._t);

@@ -35,6 +35,14 @@ class HitTable
 protected:
     AABB _box;
 public:    
+    /**
+     * @brief 判断光线与物体相交
+     * 
+     * @param r 光线 若命中则必须更新内部区间最大值为击中时的t值
+     * @param record 纪录 若命中则必须更新内部所以数据 顶点、UV、材质等
+     * @return true 命中且数据更新
+     * @return false 未命中，数组不发生改变
+     */
     virtual bool hit(Ray& r, HitRecord& record) = 0;
     virtual AABB get_aabb() const { return _box; }
 };
@@ -172,6 +180,7 @@ public:
         if (!is_interior(alpha, beta, record)) return false;
         // 更新命中点
         r.update_t_max(t);
+        record._t = t;
         record._point = P;
         record._material = _material;
         record.set_face_normal(r, _normal);
