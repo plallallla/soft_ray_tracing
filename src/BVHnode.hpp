@@ -57,20 +57,19 @@ public:
     virtual bool hit(Ray& r, HitRecord& record) override
     {
         if (!_box.hit(r)) return false;
-        return _left->hit(r, record) || _right->hit(r, record);
-        // bool hit_left = _left->hit(r, record);
-        // bool hit_anything = hit_left;
-        // if (hit_left) r.update_t_max(record._t);
-        // HitRecord right_record;
-        // if (_right->hit(r, right_record)) 
-        // {
-        //     if (!hit_left || right_record._t < record._t) 
-        //     {
-        //         record = right_record;
-        //     }
-        //     hit_anything = true;
-        // }
-        // return hit_anything;
+        bool hit_left = _left->hit(r, record);
+        bool hit_anything = hit_left;
+        if (hit_left) r.update_t_max(record._t);
+        HitRecord right_record;
+        if (_right->hit(r, right_record)) 
+        {
+            if (!hit_left || right_record._t < record._t) 
+            {
+                record = right_record;
+            }
+            hit_anything = true;
+        }
+        return hit_anything;
     }
 
     virtual AABB get_aabb() const override { return _box; }
